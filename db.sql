@@ -36,7 +36,7 @@ ENGINE = InnoDB;
 -- Table `weather_app`.`searchhistory`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `weather_app`.`searchhistory` (
-  `id` INT NOT NULL,
+  `id` VARCHAR(45) NOT NULL,
   `latitude` VARCHAR(45) NULL,
   `longitude` VARCHAR(45) NULL,
   `timezone` VARCHAR(45) NULL,
@@ -56,7 +56,7 @@ ENGINE = InnoDB;
 -- Table `weather_app`.`savedlocations`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `weather_app`.`savedlocations` (
-  `id` INT NOT NULL,
+  `id` VARCHAR(45) NOT NULL,
   `latitude` VARCHAR(45) NULL,
   `longitude` VARCHAR(45) NULL,
   `timezone` VARCHAR(45) NULL,
