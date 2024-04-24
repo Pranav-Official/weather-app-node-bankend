@@ -180,6 +180,37 @@ app.post("/savelocation", verifyToken, (req, res) => {
   );
 });
 
+//Search history---------------------------------------------------------------------------------
+app.post("/addSearchHistory", verifyToken, (req, res) => {
+  const { latitude, longitude, timezone, id } = req.body;
+  if (!latitude || !longitude || !timezone)
+    return res.status(401).send({
+      auth: false,
+      token: null,
+      message: "Make sure Latitude, Longitude and Time is being sent",
+    });
+  const uuid = uuidv4();
+  db.query(
+    "INSERT INTO searchhistory (id, latitude,longitude,timezone, user_id) VALUES (?,?, ?, ?, ?)",
+    [uuid, latitude, longitude, timezone, id],
+    (err, results) => {
+      if (err) {
+        console.error("Error executing MySQL query:", err);
+        return res
+          .status(500)
+          .send({ status: false, message: "Internal server error." });
+      }
+      // Create a token for the new user
+      const token = jwt.sign({ id: results.insertId }, "secret_key", {
+        expiresIn: 86400,
+      }); // expires in 24 hours
+      res.status(200).send({
+        status: true,
+        message: "Search history saved successfully!",
+      });
+    }
+  );
+});
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
