@@ -46,6 +46,7 @@ function verifyToken(req, res, next) {
     }
 
     req.body.id = decoded.id;
+    req.query.id = decoded.id;
     next();
   });
 }
@@ -125,6 +126,7 @@ app.post("/login", (req, res) => {
   );
 });
 
+// Settings endpoint-----------------------------------------------------------------------------
 app.patch("/updateSettings", verifyToken, (req, res) => {
   const updates = req.body;
   const userId = updates.id;
@@ -149,6 +151,7 @@ app.patch("/updateSettings", verifyToken, (req, res) => {
   );
 });
 
+// Location endpoint to save location -----------------------------------------------------------
 app.post("/location", verifyToken, (req, res) => {
   const { latitude, longitude, name, country, timezone, id } = req.body;
   if (!latitude || !longitude || !name || !country || !timezone)
@@ -171,6 +174,42 @@ app.post("/location", verifyToken, (req, res) => {
       res.status(200).send({
         status: true,
         message: "Location has been saved successfully!",
+      });
+    }
+  );
+});
+
+//is this location saved? endpoint----------------------------------------------------------------
+
+app.get("/location/isLocationSaved", verifyToken, (req, res) => {
+  const { latitude, longitude, name, country, timezone, id } = req.query;
+  console.log(req.query);
+  if (!latitude || !longitude || !name || !country || !timezone)
+    return res.status(401).send({
+      auth: false,
+      token: null,
+      message: "Make sure Latitude, Longitude,Name,Country, Time is being sent",
+    });
+  db.query(
+    "SELECT * FROM locations WHERE latitude = ? AND longitude = ? AND name = ? AND country = ? AND timezone = ? AND user_id = ? AND type = ?",
+    [latitude, longitude, name, country, timezone, id, "savedLocation"],
+    (err, results) => {
+      if (err) {
+        console.error("Error executing MySQL query:", err);
+        return res
+          .status(500)
+          .send({ status: false, message: "Internal server error." });
+      }
+      if (results.length === 0) {
+        return res.status(200).send({
+          status: false,
+          message: "Location is not saved.",
+        });
+      }
+      res.status(200).send({
+        status: true,
+        message: "Location is saved.",
+        data: results[0],
       });
     }
   );
