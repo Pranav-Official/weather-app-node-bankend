@@ -149,18 +149,18 @@ app.patch("/updateSettings", verifyToken, (req, res) => {
   );
 });
 
-app.post("/savelocation", verifyToken, (req, res) => {
-  const { latitude, longitude, timezone, id } = req.body;
-  if (!latitude || !longitude || !timezone)
+app.post("/location", verifyToken, (req, res) => {
+  const { latitude, longitude, name, country, timezone, id } = req.body;
+  if (!latitude || !longitude || !name || !country || !timezone)
     return res.status(401).send({
       auth: false,
       token: null,
-      message: "Make sure Latitude, Longitude and Time is being sent",
+      message: "Make sure Latitude, Longitude,Name,Country, Time is being sent",
     });
   const uuid = uuidv4();
   db.query(
-    "INSERT INTO locations (id, latitude,longitude,timezone, user_id, type) VALUES (?,?, ?, ?, ?,?)",
-    [uuid, latitude, longitude, timezone, id, "savedLocation"],
+    "INSERT INTO locations (id, latitude,longitude,name,country,timezone, user_id, type) VALUES (?,?, ?, ?, ?,?,?,?)",
+    [uuid, latitude, longitude, name, country, timezone, id, "savedLocation"],
     (err, results) => {
       if (err) {
         console.error("Error executing MySQL query:", err);
@@ -168,10 +168,6 @@ app.post("/savelocation", verifyToken, (req, res) => {
           .status(500)
           .send({ status: false, message: "Internal server error." });
       }
-      // Create a token for the new user
-      const token = jwt.sign({ id: results.insertId }, "secret_key", {
-        expiresIn: 86400,
-      }); // expires in 24 hours
       res.status(200).send({
         status: true,
         message: "Location has been saved successfully!",
@@ -182,7 +178,6 @@ app.post("/savelocation", verifyToken, (req, res) => {
 
 app.get("/savelocation", verifyToken, (req, res) => {
   const id = req.body.id;
-  console.log("ID->", id);
   if (!id) {
     return res.status(401).send({
       auth: false,
@@ -213,6 +208,33 @@ app.get("/savelocation", verifyToken, (req, res) => {
   );
 });
 
+//Search history---------------------------------------------------------------------------------
+app.post("/searchHistory", verifyToken, (req, res) => {
+  const { latitude, longitude, name, country, timezone, id } = req.body;
+  if (!latitude || !longitude || !name || !country || !timezone)
+    return res.status(401).send({
+      auth: false,
+      token: null,
+      message: "Make sure Latitude, Longitude,Name,Country, Time is being sent",
+    });
+  const uuid = uuidv4();
+  db.query(
+    "INSERT INTO locations (id, latitude,longitude,name,country,timezone, user_id, type) VALUES (?,?, ?, ?, ?,?,?,?)",
+    [uuid, latitude, longitude, name, country, timezone, id, "searchHistory"],
+    (err, results) => {
+      if (err) {
+        console.error("Error executing MySQL query:", err);
+        return res
+          .status(500)
+          .send({ status: false, message: "Internal server error." });
+      }
+      res.status(200).send({
+        status: true,
+        message: "Search history saved successfully!",
+      });
+    }
+  );
+});
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
