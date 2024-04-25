@@ -303,36 +303,34 @@ app.post("/searchHistory", verifyToken, (req, res) => {
 });
 
 app.get("/searchHistory", verifyToken, (req, res) => {
-  const query =
-    "SELECT latitude, longitude, name, country, timezone,create_time FROM locations";
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Error executing MySQL query:", err);
-      return res
-        .status(500)
-        .send({ status: false, message: "Internal server error." });
-    }
-    if (results.length === 0) {
-      return res
-        .status(404)
-        .send({ status: false, message: "Search history not found." });
-    }
-    const searchHistory = results.map(
-      ({ latitude, longitude, name, country, timezone, create_time }) => ({
-        latitude,
-        longitude,
-        name,
-        country,
-        timezone,
-        create_time,
-      })
-    );
-    res.status(200).send({
-      status: true,
-      message: "Search history found successfully!",
-      data: searchHistory,
+  const id = req.body.id;
+  if (!id) {
+    return res.status(401).send({
+      auth: false,
+      token: null,
+      message: "Invalid token",
     });
-  });
+  }
+  db.query(
+    `SELECT * FROM locations WHERE type = 'searchHistory' AND user_id = ?`,
+    [id],
+    (err, searchHistoryResults) => {
+      if (err) {
+        console.error("Error fetching searchHistory data:", err);
+        return res
+          .status(500)
+          .send({ status: false, message: "Internal server error." });
+      }
+
+      const searchHistoryData = searchHistoryResults;
+
+      res.status(200).send({
+        status: true,
+        message: "Search history data fetched successfully.",
+        data: searchHistoryData,
+      });
+    }
+  );
 });
 
 app.listen(PORT, () => {
