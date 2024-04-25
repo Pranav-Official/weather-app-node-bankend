@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS `weather_app`.`user` (
   `username` VARCHAR(16) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
   `password` VARCHAR(32) NOT NULL,
-  `save_seach_history` TINYINT(1) NULL,
-  `prefrered_units` VARCHAR(45) NULL,
+  `save_seach_history` TINYINT(1) NULL DEFAULT 1,
+  `prefrered_units` VARCHAR(45) NULL DEFAULT 'metric',
   `create_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
@@ -33,38 +33,21 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `weather_app`.`searchhistory`
+-- Table `weather_app`.`LOCATIONS `
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `weather_app`.`searchhistory` (
-  `id` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `weather_app`.`locations` (
+  `id` VARCHAR(45) NOT NULL,
   `latitude` VARCHAR(45) NULL,
   `longitude` VARCHAR(45) NULL,
+  `name` VARCHAR(45) NULL,
+  `country` VARCHAR(45) NULL,
   `timezone` VARCHAR(45) NULL,
   `create_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   `user_id` VARCHAR(45) NULL,
+  `type` VARCHAR(45) NULL,
   PRIMARY KEY (`id`),
   INDEX `user_id_idx` (`user_id` ASC) VISIBLE,
   CONSTRAINT `user_id`
-    FOREIGN KEY (`user_id`)
-    REFERENCES `weather_app`.`user` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `weather_app`.`savedlocations`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `weather_app`.`savedlocations` (
-  `id` INT NOT NULL,
-  `latitude` VARCHAR(45) NULL,
-  `longitude` VARCHAR(45) NULL,
-  `timezone` VARCHAR(45) NULL,
-  `create_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  `user_id` VARCHAR(45) NULL,
-  PRIMARY KEY (`id`),
-  INDEX `user_id_idx` (`user_id` ASC) VISIBLE,
-  CONSTRAINT `user_id0`
     FOREIGN KEY (`user_id`)
     REFERENCES `weather_app`.`user` (`id`)
     ON DELETE NO ACTION
