@@ -159,8 +159,8 @@ app.post("/savelocation", verifyToken, (req, res) => {
     });
   const uuid = uuidv4();
   db.query(
-    "INSERT INTO savedlocations (id, latitude,longitude,timezone, user_id) VALUES (?,?, ?, ?, ?)",
-    [uuid, latitude, longitude, timezone, id],
+    "INSERT INTO locations (id, latitude,longitude,timezone, user_id, type) VALUES (?,?, ?, ?, ?,?)",
+    [uuid, latitude, longitude, timezone, id, "savedLocation"],
     (err, results) => {
       if (err) {
         console.error("Error executing MySQL query:", err);
