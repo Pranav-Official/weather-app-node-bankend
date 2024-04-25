@@ -206,7 +206,7 @@ app.post("/searchHistory", verifyToken, (req, res) => {
 
 app.get("/searchHistory", verifyToken, (req, res) => {
   const query =
-    "SELECT latitude, longitude, name, country, timezone FROM locations";
+    "SELECT latitude, longitude, name, country, timezone,create_time FROM locations";
   db.query(query, (err, results) => {
     if (err) {
       console.error("Error executing MySQL query:", err);
@@ -220,12 +220,13 @@ app.get("/searchHistory", verifyToken, (req, res) => {
         .send({ status: false, message: "Search history not found." });
     }
     const searchHistory = results.map(
-      ({ latitude, longitude, name, country, timezone }) => ({
+      ({ latitude, longitude, name, country, timezone, create_time }) => ({
         latitude,
         longitude,
         name,
         country,
         timezone,
+        create_time,
       })
     );
     res.status(200).send({
