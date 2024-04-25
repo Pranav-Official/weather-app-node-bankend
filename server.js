@@ -179,6 +179,38 @@ app.post("/location", verifyToken, (req, res) => {
   );
 });
 
+app.get("/location", verifyToken, (req, res) => {
+  const id = req.body.id;
+  if (!id) {
+    return res.status(401).send({
+      auth: false,
+      token: null,
+      message: "Invalid token",
+    });
+  }
+  db.query(
+    `SELECT * FROM locations WHERE type = 'savedLocation' AND user_id = ?`,
+    [id],
+    (err, locationResults) => {
+      if (err) {
+        console.error("Error fetching location data:", err);
+        return res
+          .status(500)
+          .send({ status: false, message: "Internal server error." });
+      }
+
+      // Assuming you want to send the fetched location data in the response
+      const locationData = locationResults; // Assuming only one location is expected
+
+      res.status(200).send({
+        status: true,
+        message: "Location data fetched successfully.",
+        data: locationData,
+      });
+    }
+  );
+});
+
 //is this location saved? endpoint----------------------------------------------------------------
 
 app.get("/location/isLocationSaved", verifyToken, (req, res) => {
@@ -242,6 +274,39 @@ app.post("/searchHistory", verifyToken, (req, res) => {
     }
   );
 });
+
+app.get("/searchHistory", verifyToken, (req, res) => {
+  const query =
+    "SELECT latitude, longitude, name, country, timezone FROM locations";
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Error executing MySQL query:", err);
+      return res
+        .status(500)
+        .send({ status: false, message: "Internal server error." });
+    }
+    if (results.length === 0) {
+      return res
+        .status(404)
+        .send({ status: false, message: "Search history not found." });
+    }
+    const searchHistory = results.map(
+      ({ latitude, longitude, name, country, timezone }) => ({
+        latitude,
+        longitude,
+        name,
+        country,
+        timezone,
+      })
+    );
+    res.status(200).send({
+      status: true,
+      message: "Search history found successfully!",
+      data: searchHistory,
+    });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
