@@ -211,6 +211,33 @@ app.get("/location", verifyToken, (req, res) => {
   );
 });
 
+//endpoint to delete saved Location----------------------------------------------------------------
+app.delete("/location", verifyToken, (req, res) => {
+  const { latitude, longitude, name, country, timezone, id } = req.query;
+  if (!latitude || !longitude || !name || !country || !timezone)
+    return res.status(401).send({
+      auth: false,
+      token: null,
+      message: "Make sure Latitude, Longitude,Name,Country, Time is being sent",
+    });
+  db.query(
+    "DELETE FROM locations WHERE latitude = ? AND longitude = ? AND name = ? AND country = ? AND timezone = ? AND user_id = ? AND type = ?",
+    [latitude, longitude, name, country, timezone, id, "savedLocation"],
+    (err, results) => {
+      if (err) {
+        console.error("Error executing MySQL query:", err);
+        return res
+          .status(500)
+          .send({ status: false, message: "Internal server error." });
+      }
+      res.status(200).send({
+        status: true,
+        message: "Location has been deleted successfully!",
+      });
+    }
+  );
+});
+
 //is this location saved? endpoint----------------------------------------------------------------
 
 app.get("/location/isLocationSaved", verifyToken, (req, res) => {
