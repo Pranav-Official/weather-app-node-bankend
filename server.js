@@ -176,6 +176,38 @@ app.post("/location", verifyToken, (req, res) => {
   );
 });
 
+app.get("/savelocation", verifyToken, (req, res) => {
+  const id = req.body.id;
+  if (!id) {
+    return res.status(401).send({
+      auth: false,
+      token: null,
+      message: "Invalid token",
+    });
+  }
+  db.query(
+    `SELECT * FROM locations WHERE type = 'savedLocation' AND user_id = ?`,
+    [id],
+    (err, locationResults) => {
+      if (err) {
+        console.error("Error fetching location data:", err);
+        return res
+          .status(500)
+          .send({ status: false, message: "Internal server error." });
+      }
+
+      // Assuming you want to send the fetched location data in the response
+      const locationData = locationResults; // Assuming only one location is expected
+
+      res.status(200).send({
+        status: true,
+        message: "Location data fetched successfully.",
+        data: locationData,
+      });
+    }
+  );
+});
+
 //Search history---------------------------------------------------------------------------------
 app.post("/searchHistory", verifyToken, (req, res) => {
   const { latitude, longitude, name, country, timezone, id } = req.body;
