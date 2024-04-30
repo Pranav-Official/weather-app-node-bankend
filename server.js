@@ -127,7 +127,7 @@ app.post("/login", (req, res) => {
 });
 
 // Settings endpoint-----------------------------------------------------------------------------
-app.patch("/updateSettings", verifyToken, (req, res) => {
+app.patch("/settings", verifyToken, (req, res) => {
   const updates = req.body;
   const userId = updates.id;
   delete updates.id;
@@ -147,6 +147,27 @@ app.patch("/updateSettings", verifyToken, (req, res) => {
       res
         .status(200)
         .send({ status: true, message: "Settings updated successfully." });
+    }
+  );
+});
+// get Settings endpoint----------------------------------------------------------------------------
+app.get("/settings", verifyToken, (req, res) => {
+  const id = req.body.id;
+  db.query(
+    `SELECT save_seach_history, prefrered_units FROM user WHERE id = ?`,
+    [id],
+    (err, results) => {
+      if (err) {
+        console.error("Error executing MySQL query:", err);
+        return res
+          .status(500)
+          .send({ status: false, message: "Internal server error." });
+      }
+      res.status(200).send({
+        status: true,
+        message: "Settings fetched successfully.",
+        data: results[0],
+      });
     }
   );
 });
@@ -201,7 +222,7 @@ app.get("/location", verifyToken, (req, res) => {
 
       // Assuming you want to send the fetched location data in the response
       const locationData = locationResults; // Assuming only one location is expected
-
+      console.log("dsijvbsdhujivb", locationData);
       res.status(200).send({
         status: true,
         message: "Location data fetched successfully.",
@@ -303,9 +324,10 @@ app.post("/searchHistory", verifyToken, (req, res) => {
 });
 
 app.get("/searchHistory", verifyToken, (req, res) => {
+  const { id } = req.query;
   const query =
-    "SELECT latitude, longitude, name, country, timezone,create_time FROM locations";
-  db.query(query, (err, results) => {
+    "SELECT latitude, longitude, name, country, timezone,create_time FROM locations where type = 'searchHistory' AND user_id = ? ORDER BY create_time DESC";
+  db.query(query, [id], (err, results) => {
     if (err) {
       console.error("Error executing MySQL query:", err);
       return res
